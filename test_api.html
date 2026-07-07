@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { margin: 10px 0; padding: 10px; background: #f0f0f0; }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+    </style>
+</head>
+<body>
+    <h1>API Connection Test</h1>
+    <button onclick="testAPI()">Test Backend Connection</button>
+    <button onclick="testGenerate()">Test Code Generation</button>
+    <div id="results"></div>
+
+    <script>
+        function addResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.textContent = message;
+            document.getElementById('results').appendChild(div);
+        }
+
+        async function testAPI() {
+            addResult('Testing connection to http://localhost:8000/api/v1/health...');
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/health');
+                const data = await response.json();
+                addResult(`✅ Success: ${JSON.stringify(data)}`, 'success');
+            } catch (error) {
+                addResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGenerate() {
+            addResult('Testing code generation...');
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/generate-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: 'Create a hello world function',
+                        language: 'python'
+                    })
+                });
+                
+                const data = await response.json();
+                addResult(`✅ Code generation successful! Task ID: ${data.task_id}`, 'success');
+                addResult(`Generated code preview: ${data.generated_code?.substring(0, 100)}...`, 'success');
+            } catch (error) {
+                addResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

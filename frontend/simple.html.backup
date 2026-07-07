@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autonomous Coding Agent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr 300px;
+            gap: 20px;
+            height: calc(100vh - 200px);
+        }
+
+        .panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+
+        .panel-content {
+            padding: 20px;
+            height: calc(100% - 60px);
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        select, textarea, button {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, textarea:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        button {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .code-editor {
+            background: #1e293b;
+            color: #e2e8f0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            padding: 20px;
+            height: 100%;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .agent-log {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .agent-log.completed {
+            border-left: 4px solid #10b981;
+        }
+
+        .agent-log.in-progress {
+            border-left: 4px solid #3b82f6;
+        }
+
+        .agent-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .agent-status {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .output-console {
+            background: #0f172a;
+            color: #e2e8f0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            padding: 15px;
+            height: 100%;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .action-buttons button {
+            font-size: 12px;
+            padding: 8px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-indicator.completed { background: #10b981; }
+        .status-indicator.in-progress { background: #3b82f6; }
+        .status-indicator.pending { background: #6b7280; }
+        .status-indicator.failed { background: #ef4444; }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .panel {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Autonomous Coding Agent</h1>
+            <p>AI-powered multi-agent system for automated coding tasks</p>
+        </div>
+
+        <div class="main-grid">
+            <!-- Left Panel: Input -->
+            <div class="panel">
+                <div class="panel-header">
+                    📝 Code Generation
+                </div>
+                <div class="panel-content">
+                    <div class="form-group">
+                        <label for="language">Programming Language:</label>
+                        <select id="language">
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                            <option value="c">C</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prompt">What would you like to create?</label>
+                        <textarea id="prompt" placeholder="Describe the code you want to generate...&#10;Example: Create a function that calculates factorial"></textarea>
+                    </div>
+
+                    <button id="generateBtn" onclick="generateCode()">
+                        <span id="generateBtnText">🚀 Generate Code</span>
+                    </button>
+
+                    <div class="action-buttons">
+                        <button onclick="runCode()" id="runBtn">▶️ Run</button>
+                        <button onclick="debugCode()" id="debugBtn">🐛 Debug</button>
+                        <button onclick="optimizeCode()" id="optimizeBtn">⚡ Optimize</button>
+                        <button onclick="explainCode()" id="explainBtn">📖 Explain</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Panel: Code Editor -->
+            <div class="panel">
+                <div class="panel-header">
+                    💻 Code Editor
+                </div>
+                <div class="panel-content" style="padding: 0;">
+                    <div id="codeEditor" class="code-editor">
+                        // Your generated code will appear here...
+                        // Try entering a prompt and clicking "Generate Code"
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Agent Activity -->
+            <div class="panel">
+                <div class="panel-header">
+                    🤖 Agent Activity
+                </div>
+                <div class="panel-content">
+                    <div id="agentLogs">
+                        <div class="agent-log">
+                            <div class="agent-name">🔄 Ready to start</div>
+                            <div class="agent-status">Enter a prompt to begin multi-agent processing</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Panel: Output Console -->
+        <div class="panel" style="margin-top: 20px; height: 200px;">
+            <div class="panel-header">
+                📟 Output Console
+            </div>
+            <div class="panel-content" style="padding: 0;">
+                <div id="outputConsole" class="output-console">
+                    // Output will appear here...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api/v1';
+        let currentCode = '';
+        let isProcessing = false;
+
+        // Agent status indicators
+        const agentIcons = {
+            planner: '📋',
+            code_generator: '💻',
+            debug: '🐛',
+            test: '🧪',
+            optimization: '⚡',
+            explanation: '📖'
+        };
+
+        function updateAgentLogs(agentTasks) {
+            const logsContainer = document.getElementById('agentLogs');
+            logsContainer.innerHTML = '';
+
+            if (!agentTasks || agentTasks.length === 0) {
+                logsContainer.innerHTML = `
+                    <div class="agent-log">
+                        <div class="agent-name">🔄 Ready to start</div>
+                        <div class="agent-status">Enter a prompt to begin multi-agent processing</div>
+                    </div>
+                `;
+                return;
+            }
+
+            agentTasks.forEach(task => {
+                const logDiv = document.createElement('div');
+                logDiv.className = `agent-log ${task.status}`;
+                
+                const icon = agentIcons[task.agent_type] || '🤖';
+                const status = task.status.replace('_', ' ').toUpperCase();
+                const time = task.execution_time ? `${task.execution_time.toFixed(2)}s` : '';
+                
+                logDiv.innerHTML = `
+                    <div class="agent-name">
+                        <span class="status-indicator ${task.status}"></span>
+                        ${icon} ${task.agent_type.replace('_', ' ').toUpperCase()}
+                    </div>
+                    <div class="agent-status">${task.task_description} - ${status} ${time}</div>
+                `;
+                
+                logsContainer.appendChild(logDiv);
+            });
+        }
+
+        function setProcessing(processing) {
+            isProcessing = processing;
+            const generateBtn = document.getElementById('generateBtn');
+            const generateBtnText = document.getElementById('generateBtnText');
+            
+            if (processing) {
+                generateBtn.disabled = true;
+                generateBtnText.innerHTML = '<span class="loading"></span> Processing...';
+            } else {
+                generateBtn.disabled = false;
+                generateBtnText.innerHTML = '🚀 Generate Code';
+            }
+        }
+
+        function updateCode(code) {
+            currentCode = code;
+            document.getElementById('codeEditor').textContent = code;
+        }
+
+        function updateOutput(output) {
+            document.getElementById('outputConsole').textContent = output;
+        }
+
+        async function generateCode() {
+            const prompt = document.getElementById('prompt').value.trim();
+            const language = document.getElementById('language').value;
+
+            if (!prompt) {
+                alert('Please enter a prompt describing what you want to create.');
+                return;
+            }
+
+            setProcessing(true);
+            updateOutput('🔄 Generating code with multi-agent system...');
+
+            // Try different backend URLs
+            const backendUrls = [
+                'http://localhost:8000/api/v1/generate-code',
+                'http://127.0.0.1:8000/api/v1/generate-code'
+            ];
+
+            let success = false;
+            let lastError = null;
+
+            for (const url of backendUrls) {
+                try {
+                    updateOutput(`🔄 Trying backend: ${url}`);
+                    
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            prompt: prompt,
+                            language: language
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    success = true;
+                    
+                    // Update UI with results
+                    if (result.generated_code) {
+                        updateCode(result.generated_code);
+                    }
+                    
+                    if (result.execution_result) {
+                        const output = result.execution_result.success 
+                            ? result.execution_result.output 
+                            : `Error: ${result.execution_result.error}`;
+                        updateOutput(output);
+                    }
+                    
+                    if (result.agent_tasks) {
+                        updateAgentLogs(result.agent_tasks);
+                    }
+                    
+                    if (result.explanation) {
+                        updateOutput(result.explanation);
+                    }
+                    
+                    break; // Success, exit the loop
+
+                } catch (error) {
+                    lastError = error;
+                    console.error(`Failed with ${url}:`, error);
+                    updateOutput(`❌ Failed to connect to ${url}: ${error.message}`);
+                }
+            }
+
+            if (!success) {
+                updateOutput(`❌ Failed to connect to any backend endpoint.\n\nLast error: ${lastError?.message}\n\nTroubleshooting:\n1. Check if backend is running on port 8000\n2. Try running: python backend/simple_server.py\n3. Check Windows Firewall settings\n4. Try opening test_api.html to debug connection`);
+            }
+
+            setProcessing(false);
+        }
+
+        async function runCode() {
+            if (!currentCode.trim()) {
+                alert('Please generate some code first.');
+                return;
+            }
+
+            const language = document.getElementById('language').value;
+            updateOutput('▶️ Running code...');
+
+            try {
+                const response = await fetch(`${API_BASE}/run-code`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: currentCode,
+                        language: language
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateOutput(`✅ Execution successful!\n\n${result.output}`);
+                } else {
+                    updateOutput(`❌ Execution failed:\n\n${result.error}`);
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                updateOutput(`❌ Error running code: ${error.message}`);
+            }
+        }
+
+        async function debugCode() {
+            if (!currentCode.trim()) {
+                alert('Please generate some code first.');
+                return;
+            }
+
+            const language = document.getElementById('language').value;
+            updateOutput('🐛 Debugging code...');
+
+            try {
+                const response = await fetch(`${API_BASE}/debug-code`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: currentCode,
+                        language: language
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.generated_code) {
+                    updateCode(result.generated_code);
+                }
+                
+                if (result.execution_result) {
+                    const output = result.execution_result.success 
+                        ? result.execution_result.output 
+                        : result.execution_result.error;
+                    updateOutput(`🐛 Debug result:\n\n${output}`);
+                }
+                
+                if (result.agent_tasks) {
+                    updateAgentLogs(result.agent_tasks);
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                updateOutput(`❌ Error debugging code: ${error.message}`);
+            }
+        }
+
+        async function optimizeCode() {
+            if (!currentCode.trim()) {
+                alert('Please generate some code first.');
+                return;
+            }
+
+            const language = document.getElementById('language').value;
+            updateOutput('⚡ Optimizing code...');
+
+            try {
+                const response = await fetch(`${API_BASE}/optimize-code`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: currentCode,
+                        language: language
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.generated_code) {
+                    updateCode(result.generated_code);
+                }
+                
+                if (result.optimization_suggestions) {
+                    updateOutput(`⚡ Optimization complete!\n\nSuggestions:\n${result.optimization_suggestions.join('\n')}`);
+                }
+                
+                if (result.agent_tasks) {
+                    updateAgentLogs(result.agent_tasks);
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                updateOutput(`❌ Error optimizing code: ${error.message}`);
+            }
+        }
+
+        async function explainCode() {
+            if (!currentCode.trim()) {
+                alert('Please generate some code first.');
+                return;
+            }
+
+            const language = document.getElementById('language').value;
+            updateOutput('📖 Generating explanation...');
+
+            // Try different backend URLs
+            const backendUrls = [
+                'http://localhost:8000/api/v1/explain-code',
+                'http://127.0.0.1:8000/api/v1/explain-code'
+            ];
+
+            let success = false;
+            let lastError = null;
+
+            for (const url of backendUrls) {
+                try {
+                    updateOutput(`📖 Trying explanation: ${url}`);
+                    
+                    // Add timeout
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+                    
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            code: currentCode,
+                            language: language
+                        }),
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    success = true;
+                    
+                    if (result.explanation) {
+                        updateOutput(`📖 Code Explanation:\n\n${result.explanation}`);
+                    } else {
+                        updateOutput('📖 Explanation generated but no content returned.');
+                    }
+                    
+                    if (result.agent_tasks) {
+                        updateAgentLogs(result.agent_tasks);
+                    }
+                    
+                    break; // Success, exit the loop
+
+                } catch (error) {
+                    lastError = error;
+                    console.error(`Failed with ${url}:`, error);
+                    
+                    if (error.name === 'AbortError') {
+                        updateOutput(`❌ Timeout connecting to ${url}: Request took too long`);
+                    } else {
+                        updateOutput(`❌ Failed to connect to ${url}: ${error.message}`);
+                    }
+                }
+            }
+
+            if (!success) {
+                updateOutput(`❌ Failed to generate explanation.\n\nLast error: ${lastError?.message}\n\nTroubleshooting:\n1. Check if backend is running on port 8000\n2. Try running: python backend/simple_server.py\n3. Check if the code is valid\n4. Try refreshing the page and trying again`);
+            }
+        }
+
+        // Test connection on page load
+        window.addEventListener('load', async () => {
+            updateOutput('🔄 Testing connection to backend...');
+            
+            // Test multiple endpoints to find working one
+            const endpoints = [
+                `${API_BASE}/health`,
+                'http://127.0.0.1:8000/api/v1/health',
+                'http://localhost:8000/api/v1/health'
+            ];
+            
+            let connected = false;
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(endpoint);
+                    if (response.ok) {
+                        updateOutput('✅ Connected to Autonomous Coding Agent API!\n\nTry entering a prompt like:\n• "Create a function that calculates factorial"\n• "Build a simple REST API"\n• "Write a script to process CSV files"');
+                        connected = true;
+                        break;
+                    }
+                } catch (error) {
+                    console.log(`Failed to connect to ${endpoint}:`, error.message);
+                }
+            }
+            
+            if (!connected) {
+                updateOutput('❌ Cannot connect to backend server.\n\nTroubleshooting steps:\n1. Make sure Python backend server is running\n2. Check if port 8000 is available\n3. Try running: python backend/simple_server.py\n4. Check Windows Firewall settings\n\nCurrent servers should be:\n• Backend: http://localhost:8000\n• Frontend: http://localhost:3000/simple.html');
+            }
+        });
+
+        // Add keyboard shortcut (Ctrl+Enter)
+        document.getElementById('prompt').addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                generateCode();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  # Backend Service
+  backend:
+    build:
+      context: .
+      target: backend
+    container_name: autonomous-coding-agent-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app/backend
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - AI_MODEL=gpt-4o
+    volumes:
+      - ./backend:/app/backend
+      - /var/run/docker.sock:/var/run/docker.sock  # For code execution
+    depends_on:
+      - redis
+    networks:
+      - coding-agent-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend Service
+  frontend:
+    build:
+      context: .
+      target: frontend
+    container_name: autonomous-coding-agent-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    networks:
+      - coding-agent-network
+    restart: unless-stopped
+
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: autonomous-coding-agent-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - coding-agent-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Code Execution Sandbox (isolated containers)
+  code-sandbox:
+    image: python:3.10-slim
+    container_name: autonomous-coding-agent-sandbox
+    volumes:
+      - /tmp:/tmp
+    networks:
+      - coding-agent-network
+    # This service is used dynamically for code execution
+    # It doesn't run continuously but is available for spawning
+    profiles:
+      - sandbox
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  coding-agent-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autonomous Coding Agent - AI Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea, #764ba2);
+            --secondary-gradient: linear-gradient(135deg, #f093fb, #f5576c);
+            --success-gradient: linear-gradient(135deg, #4facfe, #00f2fe);
+            --warning-gradient: linear-gradient(135deg, #fa709a, #fee140);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            
+            /* Text Colors with Strong Contrast */
+            --text-primary: #FFFFFF;
+            --text-secondary: #E5E7EB;
+            --text-label: #F1F5F9;
+            --text-input: #111827;
+            --text-muted: #9CA3AF;
+            
+            /* Background Colors */
+            --bg-input: #ffffff;
+            --bg-code-editor: #0f172a;
+            --bg-panel: rgba(255, 255, 255, 0.12);
+            
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            max-height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            color: var(--text-primary);
+            position: relative;
+        }
+
+        /* Animated background particles */
+        .bg-animation {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        /* Header */
+        .header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 20px 40px;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 100%;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff, #e8f4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: grid;
+            grid-template-columns: 25% 50% 25%;
+            gap: 20px;
+            height: calc(100vh - 140px);
+            padding: 20px 40px;
+            position: relative;
+            z-index: 5;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow-y: auto;
+            transition: height 0.3s ease-in-out;
+        }
+
+        .main-container.console-hidden {
+            height: calc(100vh - 60px);
+        }
+
+        /* Glass Panel Style */
+        .glass-panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .glass-panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .panel-header {
+            background: var(--bg-panel);
+            padding: 20px;
+            border-bottom: 1px solid var(--glass-border);
+            font-weight: 700;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-primary);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .panel-header i {
+            font-size: 1.2rem;
+            color: #4facfe;
+        }
+
+        .panel-content {
+            padding: 20px;
+            height: calc(100% - 65px);
+            overflow-y: auto;
+        }
+
+        /* Left Panel - Controls */
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-label);
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select-wrapper::after {
+            content: '\f107';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: var(--text-input);
+        }
+
+        select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            background: var(--bg-input);
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            color: var(--text-input);
+            font-size: 16px;
+            transition: var(--transition);
+            appearance: none;
+            font-family: "Inter", "Segoe UI", sans-serif;
+            font-weight: 500;
+        }
+
+        select:focus, textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+            background: var(--bg-input);
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        textarea::placeholder {
+            color: #9CA3AF;
+            font-weight: 400;
+        }
+
+        select option {
+            background: var(--bg-input);
+            color: var(--text-input);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: "Inter", "Segoe UI", sans-serif;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: var(--success-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Center Panel - Code Editor */
+        .code-editor {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .editor-tabs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .tab.active {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        #codeEditor {
+            flex: 1;
+            background: var(--bg-code-editor);
+            color: #e2e8f0;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 15px;
+            line-height: 1.6;
+            padding: 20px;
+            overflow-y: auto;
+            border: none;
+            resize: none;
+            white-space: pre;
+            tab-size: 4;
+        }
+
+        #codeEditor:focus {
+            outline: none;
+        }
+
+        #codeEditor::placeholder {
+            color: #64748b;
+            font-style: italic;
+        }
+
+        /* Enhanced Agent Activity Panel */
+        .workflow-timeline {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .timeline-header h3 {
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .timeline-progress {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--success-gradient);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 3px;
+        }
+
+        .timeline-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            transition: var(--transition);
+        }
+
+        .timeline-item.active {
+            background: rgba(79, 172, 254, 0.2);
+            color: #4facfe;
+        }
+
+        .timeline-item.completed {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .timeline-item.pending {
+            background: rgba(156, 163, 175, 0.1);
+            color: var(--text-muted);
+        }
+
+        .timeline-number {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .timeline-item.active .timeline-number {
+            background: #4facfe;
+            color: white;
+        }
+
+        .timeline-item.completed .timeline-number {
+            background: #22c55e;
+            color: white;
+        }
+
+        .agent-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .agent-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: var(--transition);
+            overflow: hidden;
+        }
+
+        .agent-card:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateX(5px);
+        }
+
+        .agent-card.active {
+            border-color: #4facfe;
+            box-shadow: 0 0 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            cursor: pointer;
+        }
+
+        .agent-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .agent-name {
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+        }
+
+        .agent-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: none;
+        }
+
+        .status-idle {
+            background: rgba(156, 163, 175, 0.3);
+            color: var(--text-muted);
+        }
+
+        .status-processing {
+            background: var(--warning-gradient);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .status-processing .status-dot {
+            animation: spin 1s linear infinite;
+            background: white;
+        }
+
+        .status-completed {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .status-failed {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .expand-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: var(--transition);
+        }
+
+        .expand-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .expand-btn.expanded i {
+            transform: rotate(180deg);
+        }
+
+        .agent-content {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .agent-logs {
+            padding: 15px;
+            max-height: 120px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .log-entry {
+            color: #00ff88;
+            margin-bottom: 5px;
+            opacity: 0;
+            animation: fadeInLog 0.3s ease forwards;
+        }
+
+        @keyframes fadeInLog {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .log-entry.typing {
+            overflow: hidden;
+            white-space: nowrap;
+            animation: typing 2s steps(40, end);
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        .agent-details {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .details-content {
+            padding: 15px;
+        }
+
+        .details-content h4 {
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .details-content > div {
+            color: var(--text-secondary);
+            font-size: 11px;
+            line-height: 1.4;
+            margin-bottom: 12px;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+        }
+
+        .system-terminal {
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background: rgba(0, 0, 0, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .terminal-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .terminal-clear {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: var(--transition);
+        }
+
+        .terminal-clear:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .terminal-content {
+            padding: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .terminal-line {
+            color: #00ff88;
+            margin-bottom: 3px;
+            opacity: 0;
+            animation: fadeInLog 0.3s ease forwards;
+        }
+
+        .terminal-line.error {
+            color: #ef4444;
+        }
+
+        .terminal-line.warning {
+            color: #f59e0b;
+        }
+
+        .terminal-line.info {
+            color: #3b82f6;
+        }
+
+        /* Bottom Console */
+        .console-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 180px;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 2px solid var(--glass-border);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .console-container.hidden {
+            transform: translateY(100%);
+        }
+
+        .console-toggle {
+            position: fixed;
+            bottom: 0;
+            right: 20px;
+            background: var(--success-gradient);
+            color: white;
+            border: none;
+            border-radius: 12px 12px 0 0;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 101;
+            transition: all 0.3s ease;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .console-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .console-toggle.collapsed {
+            border-radius: 12px 12px 0 0;
+        }
+
+        .console-header {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .console-title {
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .console-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        #outputConsole {
+            flex: 1;
+            background: #0a0a0a;
+            color: #00ff88;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 14px;
+            padding: 15px 20px;
+            overflow-y: auto;
+            border: none;
+            resize: none;
+            white-space: pre-wrap;
+            font-weight: 500;
+            min-height: 0;
+            box-sizing: border-box;
+        }
+
+        #outputConsole:focus {
+            outline: none;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        #outputConsole::placeholder {
+            color: #64748b;
+            font-style: italic;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #4facfe;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 30% 40% 30%;
+                padding: 15px 30px;
+            }
+            
+            .panel-header {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+                height: calc(100vh - 140px);
+                padding: 10px 20px;
+                gap: 15px;
+            }
+            
+            .main-container.console-hidden {
+                height: calc(100vh - 60px);
+            }
+            
+            .console-container {
+                height: 140px;
+            }
+            
+            .console-toggle {
+                right: 15px;
+                font-size: 11px;
+                padding: 6px 12px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .panel-header {
+                font-size: 16px;
+                padding: 15px;
+            }
+            
+            .control-group label {
+                font-size: 14px;
+            }
+            
+            .btn {
+                font-size: 14px;
+                padding: 10px 16px;
+            }
+            
+            select, textarea {
+                font-size: 15px;
+            }
+            
+            #codeEditor {
+                font-size: 14px;
+            }
+            
+            #outputConsole {
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-container {
+                padding: 10px 15px;
+            }
+            
+            .console-container {
+                height: 120px;
+            }
+            
+            .console-toggle {
+                right: 10px;
+                font-size: 10px;
+                padding: 5px 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation" id="bgAnimation"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1>Autonomous Coding Agent</h1>
+            <p>Multi-Agent System for Automated Code Generation</p>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Left Panel - Controls -->
+        <section class="glass-panel">
+            <div class="panel-header">
+                <i class="fas fa-code"></i>
+                Code Generation
+            </div>
+            <div class="panel-content">
+                <div class="control-group">
+                    <label for="language">Programming Language</label>
+                    <div class="select-wrapper">
+                        <select id="language">
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                            <option value="c">C</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="prompt">What would you like to create?</label>
+                    <textarea id="prompt" placeholder="Describe the code you want to generate...&#10;Example: Create a function that calculates factorial"></textarea>
+                </div>
+
+                <button class="btn btn-primary" id="generateBtn">
+                    <i class="fas fa-magic"></i>
+                    Generate Code
+                </button>
+
+                <div class="btn-group">
+                    <button class="btn btn-secondary" id="runBtn">
+                        <i class="fas fa-play"></i>
+                        Run
+                    </button>
+                    <button class="btn btn-secondary" id="debugBtn">
+                        <i class="fas fa-bug"></i>
+                        Debug
+                    </button>
+                    <button class="btn btn-secondary" id="optimizeBtn">
+                        <i class="fas fa-bolt"></i>
+                        Optimize
+                    </button>
+                    <button class="btn btn-secondary" id="explainBtn">
+                        <i class="fas fa-info-circle"></i>
+                        Explain
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Center Panel - Code Editor -->
+        <section class="glass-panel">
+            <div class="panel-header">
+                <i class="fas fa-edit"></i>
+                Code Editor
+            </div>
+            <div class="code-editor">
+                <div class="editor-header">
+                    <div class="editor-tabs">
+                        <div class="tab active" id="mainTab">main.py</div>
+                    </div>
+                    <div class="editor-actions">
+                        <button class="icon-btn" title="Copy Code">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="icon-btn" title="Download">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button class="icon-btn" title="Settings">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    </div>
+                </div>
+                <textarea id="codeEditor" placeholder="// Your generated code will appear here...&#10;// Welcome to Autonomous Coding Agent"></textarea>
+            </div>
+        </section>
+
+        <!-- Right Panel - Agent Activity -->
+        <section class="glass-panel">
+            <div class="panel-header">
+                <i class="fas fa-robot"></i>
+                Agent Activity
+            </div>
+            <div class="panel-content">
+                <!-- Workflow Timeline -->
+                <div class="workflow-timeline" id="workflowTimeline">
+                    <div class="timeline-header">
+                        <h3>Workflow Timeline</h3>
+                        <div class="timeline-progress" id="timelineProgress">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                    </div>
+                    <div class="timeline-items" id="timelineItems">
+                        <!-- Timeline items will be generated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Agent Cards -->
+                <div class="agent-list" id="agentList">
+                    <div class="agent-card" data-agent="planner">
+                        <div class="agent-header">
+                            <div class="agent-info">
+                                <div class="agent-name">
+                                    <i class="fas fa-tasks"></i>
+                                    Planner Agent
+                                </div>
+                                <div class="agent-status status-idle" id="plannerStatus">
+                                    <span class="status-dot"></span>
+                                    Idle
+                                </div>
+                            </div>
+                            <button class="expand-btn" onclick="toggleAgentDetails('planner')">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="agent-content">
+                            <div class="agent-logs" id="plannerLogs">
+                                <div class="log-entry">Waiting for task...</div>
+                            </div>
+                            <div class="agent-details" id="plannerDetails" style="display: none;">
+                                <div class="details-content">
+                                    <h4>Agent Reasoning</h4>
+                                    <div class="reasoning-text" id="plannerReasoning">No reasoning available yet.</div>
+                                    <h4>Execution Steps</h4>
+                                    <div class="execution-steps" id="plannerSteps">No steps defined yet.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="agent-card" data-agent="codegen">
+                        <div class="agent-header">
+                            <div class="agent-info">
+                                <div class="agent-name">
+                                    <i class="fas fa-code"></i>
+                                    Code Generator Agent
+                                </div>
+                                <div class="agent-status status-idle" id="codegenStatus">
+                                    <span class="status-dot"></span>
+                                    Idle
+                                </div>
+                            </div>
+                            <button class="expand-btn" onclick="toggleAgentDetails('codegen')">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="agent-content">
+                            <div class="agent-logs" id="codegenLogs">
+                                <div class="log-entry">Ready to generate code...</div>
+                            </div>
+                            <div class="agent-details" id="codegenDetails" style="display: none;">
+                                <div class="details-content">
+                                    <h4>Generated Prompts</h4>
+                                    <div class="prompts-text" id="codegenPrompts">No prompts generated yet.</div>
+                                    <h4>Implementation Strategy</h4>
+                                    <div class="strategy-text" id="codegenStrategy">No strategy defined yet.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="agent-card" data-agent="debug">
+                        <div class="agent-header">
+                            <div class="agent-info">
+                                <div class="agent-name">
+                                    <i class="fas fa-bug"></i>
+                                    Debug Agent
+                                </div>
+                                <div class="agent-status status-idle" id="debugStatus">
+                                    <span class="status-dot"></span>
+                                    Idle
+                                </div>
+                            </div>
+                            <button class="expand-btn" onclick="toggleAgentDetails('debug')">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="agent-content">
+                            <div class="agent-logs" id="debugLogs">
+                                <div class="log-entry">Ready to debug...</div>
+                            </div>
+                            <div class="agent-details" id="debugDetails" style="display: none;">
+                                <div class="details-content">
+                                    <h4>Debug Analysis</h4>
+                                    <div class="analysis-text" id="debugAnalysis">No analysis available yet.</div>
+                                    <h4>Issues Found</h4>
+                                    <div class="issues-text" id="debugIssues">No issues detected yet.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="agent-card" data-agent="test">
+                        <div class="agent-header">
+                            <div class="agent-info">
+                                <div class="agent-name">
+                                    <i class="fas fa-vial"></i>
+                                    Test Agent
+                                </div>
+                                <div class="agent-status status-idle" id="testStatus">
+                                    <span class="status-dot"></span>
+                                    Idle
+                                </div>
+                            </div>
+                            <button class="expand-btn" onclick="toggleAgentDetails('test')">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="agent-content">
+                            <div class="agent-logs" id="testLogs">
+                                <div class="log-entry">Ready to test...</div>
+                            </div>
+                            <div class="agent-details" id="testDetails" style="display: none;">
+                                <div class="details-content">
+                                    <h4>Test Cases</h4>
+                                    <div class="test-cases" id="testCases">No test cases generated yet.</div>
+                                    <h4>Test Results</h4>
+                                    <div class="test-results" id="testResults">No results available yet.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="agent-card" data-agent="optimize">
+                        <div class="agent-header">
+                            <div class="agent-info">
+                                <div class="agent-name">
+                                    <i class="fas fa-bolt"></i>
+                                    Optimization Agent
+                                </div>
+                                <div class="agent-status status-idle" id="optimizeStatus">
+                                    <span class="status-dot"></span>
+                                    Idle
+                                </div>
+                            </div>
+                            <button class="expand-btn" onclick="toggleAgentDetails('optimize')">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="agent-content">
+                            <div class="agent-logs" id="optimizeLogs">
+                                <div class="log-entry">Ready to optimize...</div>
+                            </div>
+                            <div class="agent-details" id="optimizeDetails" style="display: none;">
+                                <div class="details-content">
+                                    <h4>Optimization Strategy</h4>
+                                    <div class="opt-strategy" id="optStrategy">No optimization strategy yet.</div>
+                                    <h4>Performance Improvements</h4>
+                                    <div class="perf-improvements" id="perfImprovements">No improvements identified yet.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="agent-card" data-agent="explain">
+                        <div class="agent-header">
+                            <div class="agent-info">
+                                <div class="agent-name">
+                                    <i class="fas fa-info-circle"></i>
+                                    Explanation Agent
+                                </div>
+                                <div class="agent-status status-idle" id="explainStatus">
+                                    <span class="status-dot"></span>
+                                    Idle
+                                </div>
+                            </div>
+                            <button class="expand-btn" onclick="toggleAgentDetails('explain')">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="agent-content">
+                            <div class="agent-logs" id="explainLogs">
+                                <div class="log-entry">Ready to explain...</div>
+                            </div>
+                            <div class="agent-details" id="explainDetails" style="display: none;">
+                                <div class="details-content">
+                                    <h4>Code Analysis</h4>
+                                    <div class="code-analysis" id="codeAnalysis">No analysis available yet.</div>
+                                    <h4>Explanation Summary</h4>
+                                    <div class="explanation-summary" id="explanationSummary">No explanation generated yet.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Terminal -->
+                <div class="system-terminal">
+                    <div class="terminal-header">
+                        <div class="terminal-title">
+                            <i class="fas fa-terminal"></i>
+                            System Log
+                        </div>
+                        <button class="terminal-clear" onclick="clearSystemLog()">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="terminal-content" id="systemTerminal">
+                        <div class="terminal-line">System initialized and ready...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Console -->
+    <section class="console-container" id="consoleContainer">
+        <div class="console-header">
+            <div class="console-title">
+                <i class="fas fa-terminal"></i>
+                Output Console
+            </div>
+            <div class="console-actions">
+                <button class="icon-btn" title="Clear Console">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <button class="icon-btn" title="Copy Output">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+        </div>
+        <textarea id="outputConsole" readonly placeholder="Output will appear here..."></textarea>
+    </section>
+
+    <!-- Console Toggle Button -->
+    <button class="console-toggle" id="consoleToggle" onclick="toggleConsole()">
+        <i class="fas fa-chevron-down"></i> Console
+    </button>
+
+    <script>
+        // Initialize background animation
+        function createParticles() {
+            const bgAnimation = document.getElementById('bgAnimation');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                bgAnimation.appendChild(particle);
+            }
+        }
+
+        // Initialize
+        createParticles();
+
+        // Global variables
+        let currentCode = '';
+        let isProcessing = false;
+        let currentAgentIndex = 0;
+        let agentWorkflow = [];
+        let consoleVisible = true;
+
+        // Agent workflow configuration
+        const agents = [
+            { 
+                id: 'planner', 
+                name: 'Planner Agent', 
+                icon: 'fas fa-tasks',
+                logs: [
+                    'Analyzing user request...',
+                    'Breaking task into executable steps...',
+                    'Creating execution plan...',
+                    'Validating approach...',
+                    'Plan generated successfully'
+                ],
+                reasoning: 'Analyzing the user prompt to understand requirements and create a structured approach.',
+                steps: '1. Parse user input\n2. Identify programming language\n3. Determine code structure\n4. Plan implementation strategy'
+            },
+            { 
+                id: 'codegen', 
+                name: 'Code Generator Agent', 
+                icon: 'fas fa-code',
+                logs: [
+                    'Initializing code generation...',
+                    'Generating function structure...',
+                    'Implementing core logic...',
+                    'Adding error handling...',
+                    'Finalizing implementation...',
+                    'Code generation complete'
+                ],
+                prompts: 'Generate a {language} implementation for: {prompt}\nRequirements:\n- Clean, readable code\n- Proper error handling\n- Include examples\n- Add documentation',
+                strategy: 'Using template-based generation with language-specific patterns and best practices.'
+            },
+            { 
+                id: 'debug', 
+                name: 'Debug Agent', 
+                icon: 'fas fa-bug',
+                logs: [
+                    'Starting static analysis...',
+                    'Checking syntax errors...',
+                    'Analyzing logic flow...',
+                    'Identifying potential issues...',
+                    'Applying fixes...',
+                    'Debugging complete'
+                ],
+                analysis: 'Performing comprehensive code analysis to identify syntax, logic, and runtime issues.',
+                issues: 'No critical issues found. Code follows best practices and handles edge cases appropriately.'
+            },
+            { 
+                id: 'test', 
+                name: 'Test Agent', 
+                icon: 'fas fa-vial',
+                logs: [
+                    'Designing test cases...',
+                    'Creating unit tests...',
+                    'Running integration tests...',
+                    'Validating edge cases...',
+                    'Testing complete'
+                ],
+                testCases: '1. Test basic functionality\n2. Test edge cases\n3. Test error handling\n4. Test performance',
+                results: 'All tests passed successfully. Code handles expected and edge cases properly.'
+            },
+            { 
+                id: 'optimize', 
+                name: 'Optimization Agent', 
+                icon: 'fas fa-bolt',
+                logs: [
+                    'Analyzing performance...',
+                    'Identifying bottlenecks...',
+                    'Optimizing algorithms...',
+                    'Improving memory usage...',
+                    'Optimization complete'
+                ],
+                strategy: 'Optimizing for performance, readability, and maintainability.',
+                improvements: '- Improved algorithm complexity\n- Enhanced error handling\n- Better code organization\n- Added performance optimizations'
+            },
+            { 
+                id: 'explain', 
+                name: 'Explanation Agent', 
+                icon: 'fas fa-info-circle',
+                logs: [
+                    'Analyzing code structure...',
+                    'Generating documentation...',
+                    'Creating usage examples...',
+                    'Writing explanations...',
+                    'Documentation complete'
+                ],
+                analysis: 'Code implements a clean, well-structured solution with proper error handling and documentation.',
+                summary: 'The generated code provides a robust implementation that follows best practices and includes comprehensive documentation.'
+            }
+        ];
+
+        // Initialize timeline
+        function initializeTimeline() {
+            const timelineItems = document.getElementById('timelineItems');
+            timelineItems.innerHTML = '';
+            
+            agents.forEach((agent, index) => {
+                const item = document.createElement('div');
+                item.className = 'timeline-item pending';
+                item.id = `timeline-${agent.id}`;
+                item.innerHTML = `
+                    <div class="timeline-number">${index + 1}</div>
+                    <div class="timeline-text">${agent.name}</div>
+                `;
+                timelineItems.appendChild(item);
+            });
+        }
+
+        // Toggle console visibility
+        function toggleConsole() {
+            const consoleContainer = document.getElementById('consoleContainer');
+            const consoleToggle = document.getElementById('consoleToggle');
+            const mainContainer = document.querySelector('.main-container');
+            
+            consoleVisible = !consoleVisible;
+            
+            if (consoleVisible) {
+                consoleContainer.classList.remove('hidden');
+                mainContainer.classList.remove('console-hidden');
+                consoleToggle.innerHTML = '<i class="fas fa-chevron-down"></i> Console';
+                consoleToggle.classList.remove('collapsed');
+            } else {
+                consoleContainer.classList.add('hidden');
+                mainContainer.classList.add('console-hidden');
+                consoleToggle.innerHTML = '<i class="fas fa-chevron-up"></i> Console';
+                consoleToggle.classList.add('collapsed');
+            }
+        }
+
+        // Update console output
+        function updateOutput(message) {
+            const console = document.getElementById('outputConsole');
+            const timestamp = new Date().toLocaleTimeString();
+            console.value += `[${timestamp}] ${message}\n`;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        // Update system terminal
+        function updateSystemLog(message, type = 'info') {
+            const terminal = document.getElementById('systemTerminal');
+            const line = document.createElement('div');
+            line.className = `terminal-line ${type}`;
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        // Update agent status with animation
+        function updateAgentStatus(agentId, status, logs = [], details = {}) {
+            const agentCard = document.querySelector(`[data-agent="${agentId}"]`);
+            const statusElement = document.getElementById(`${agentId}Status`);
+            const logsElement = document.getElementById(`${agentId}Logs`);
+            
+            if (!agentCard || !statusElement || !logsElement) return;
+            
+            // Update status
+            statusElement.className = `agent-status status-${status}`;
+            statusElement.innerHTML = `
+                <span class="status-dot"></span>
+                ${status.charAt(0).toUpperCase() + status.slice(1)}
+            `;
+            
+            // Update card active state
+            agentCard.classList.toggle('active', status === 'processing');
+            
+            // Add logs with typing animation
+            if (logs.length > 0) {
+                logsElement.innerHTML = '';
+                logs.forEach((log, index) => {
+                    setTimeout(() => {
+                        const logEntry = document.createElement('div');
+                        logEntry.className = 'log-entry typing';
+                        logEntry.textContent = log;
+                        logsElement.appendChild(logEntry);
+                        logsElement.scrollTop = logsElement.scrollHeight;
+                        
+                        // Remove typing animation after completion
+                        setTimeout(() => {
+                            logEntry.classList.remove('typing');
+                        }, 2000);
+                    }, index * 800);
+                });
+            }
+            
+            // Update details if provided
+            if (Object.keys(details).length > 0) {
+                Object.entries(details).forEach(([key, value]) => {
+                    const element = document.getElementById(`${agentId}${key}`);
+                    if (element) {
+                        element.textContent = value;
+                    }
+                });
+            }
+            
+            // Update timeline
+            const timelineItem = document.getElementById(`timeline-${agentId}`);
+            if (timelineItem) {
+                timelineItem.className = `timeline-item ${status}`;
+            }
+        }
+
+        // Toggle agent details
+        function toggleAgentDetails(agentId) {
+            const details = document.getElementById(`${agentId}Details`);
+            const button = document.querySelector(`[data-agent="${agentId}"] .expand-btn i`);
+            
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+                button.classList.add('expanded');
+            } else {
+                details.style.display = 'none';
+                button.classList.remove('expanded');
+            }
+        }
+
+        // Clear system log
+        function clearSystemLog() {
+            const terminal = document.getElementById('systemTerminal');
+            terminal.innerHTML = '<div class="terminal-line">System log cleared...</div>';
+        }
+
+        // Update progress bar
+        function updateProgress(percentage) {
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${percentage}%`;
+        }
+
+        // Simulate agent workflow with real-time updates
+        async function simulateAgentWorkflow(taskType) {
+            updateSystemLog(`Starting ${taskType} workflow...`, 'info');
+            updateOutput(`Initiating ${taskType} workflow...`);
+            
+            for (let i = 0; i < agents.length; i++) {
+                const agent = agents[i];
+                currentAgentIndex = i;
+                
+                // Update progress
+                const progress = ((i + 1) / agents.length) * 100;
+                updateProgress(progress);
+                
+                // Set agent to processing
+                updateAgentStatus(agent.id, 'processing', agent.logs, {
+                    Reasoning: agent.reasoning,
+                    Steps: agent.steps,
+                    Prompts: agent.prompts,
+                    Strategy: agent.strategy,
+                    Analysis: agent.analysis,
+                    Issues: agent.issues,
+                    'Test Cases': agent.testCases,
+                    'Test Results': agent.testResults,
+                    'Opt Strategy': agent.strategy,
+                    'Performance Improvements': agent.improvements,
+                    'Code Analysis': agent.analysis,
+                    'Explanation Summary': agent.summary
+                });
+                
+                updateSystemLog(`${agent.name} is processing...`, 'info');
+                
+                // Simulate processing time
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                
+                // Mark as completed
+                updateAgentStatus(agent.id, 'completed');
+                updateSystemLog(`${agent.name} completed successfully`, 'info');
+                
+                // Small delay between agents
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            updateSystemLog(`${taskType} workflow completed successfully!`, 'info');
+            updateOutput(`${taskType} completed successfully!`);
+        }
+
+        // Reset all agents
+        function resetAgents() {
+            agents.forEach(agent => {
+                updateAgentStatus(agent.id, 'idle', ['Waiting for task...']);
+            });
+            updateProgress(0);
+            
+            // Reset timeline
+            agents.forEach(agent => {
+                const timelineItem = document.getElementById(`timeline-${agent.id}`);
+                if (timelineItem) {
+                    timelineItem.className = 'timeline-item pending';
+                }
+            });
+            
+            // Clear system log
+            updateSystemLog('System reset - ready for new task', 'info');
+        }
+
+        // Generate Code
+        async function generateCode() {
+            if (isProcessing) return;
+            
+            const prompt = document.getElementById('prompt').value.trim();
+            const language = document.getElementById('language').value;
+
+            if (!prompt) {
+                updateOutput('Please enter a prompt describing what you want to create.');
+                return;
+            }
+
+            isProcessing = true;
+            resetAgents();
+            updateOutput(`Generating code for: "${prompt}" in ${language}...`);
+            updateSystemLog(`Code generation request received`, 'info');
+
+            try {
+                const backendUrls = [
+                    'http://localhost:8000/api/v1/generate-code',
+                    'http://127.0.0.1:8000/api/v1/generate-code'
+                ];
+
+                let success = false;
+                let response = null;
+
+                for (const url of backendUrls) {
+                    try {
+                        response = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                prompt: prompt,
+                                language: language
+                            })
+                        });
+
+                        if (response.ok) {
+                            success = true;
+                            break;
+                        }
+                    } catch (error) {
+                        console.log(`Failed to connect to ${url}:`, error);
+                        continue;
+                    }
+                }
+
+                if (success) {
+                    const data = await response.json();
+                    currentCode = data.generated_code || '# Generated code';
+                    document.getElementById('codeEditor').value = currentCode;
+                    
+                    // Update file extension in tab
+                    const extensions = {
+                        'python': 'py',
+                        'javascript': 'js',
+                        'java': 'java',
+                        'cpp': 'cpp',
+                        'c': 'c'
+                    };
+                    const tab = document.getElementById('mainTab');
+                    tab.textContent = `main.${extensions[language] || 'txt'}`;
+                    
+                    updateOutput('Code generated successfully!');
+                    updateSystemLog('Code generation completed successfully', 'info');
+                    
+                    // Simulate agent workflow
+                    await simulateAgentWorkflow('code generation');
+                } else {
+                    throw new Error('Failed to connect to backend');
+                }
+
+            } catch (error) {
+                updateOutput(`Error: ${error.message}`);
+                updateSystemLog(`Error: ${error.message}`, 'error');
+                updateOutput('Make sure the backend server is running on http://localhost:8000');
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        // Run Code
+        async function runCode() {
+            if (!currentCode) {
+                updateOutput('No code to run. Please generate code first.');
+                return;
+            }
+
+            const language = document.getElementById('language').value;
+            updateOutput('Running code...');
+            updateSystemLog('Code execution started', 'info');
+
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/run-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: currentCode,
+                        language: language
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const result = data.execution_result;
+                    updateOutput(`Execution result: ${result.output}`);
+                    updateSystemLog('Code executed successfully', 'info');
+                    await simulateAgentWorkflow('code execution');
+                } else {
+                    throw new Error('Failed to run code');
+                }
+
+            } catch (error) {
+                updateOutput(`Error running code: ${error.message}`);
+                updateSystemLog(`Execution error: ${error.message}`, 'error');
+            }
+        }
+
+        // Debug Code
+        async function debugCode() {
+            if (!currentCode) {
+                updateOutput('No code to debug. Please generate code first.');
+                return;
+            }
+
+            const language = document.getElementById('language').value;
+            updateOutput('Debugging code...');
+            updateSystemLog('Debug process started', 'info');
+
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/debug-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: currentCode,
+                        language: language
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentCode = data.generated_code || currentCode;
+                    document.getElementById('codeEditor').value = currentCode;
+                    updateOutput('Code debugged and fixed!');
+                    updateSystemLog('Debugging completed successfully', 'info');
+                    await simulateAgentWorkflow('debugging');
+                } else {
+                    throw new Error('Failed to debug code');
+                }
+
+            } catch (error) {
+                updateOutput(`Error debugging code: ${error.message}`);
+                updateSystemLog(`Debug error: ${error.message}`, 'error');
+            }
+        }
+
+        // Optimize Code
+        async function optimizeCode() {
+            if (!currentCode) {
+                updateOutput('No code to optimize. Please generate code first.');
+                return;
+            }
+
+            const language = document.getElementById('language').value;
+            updateOutput('Optimizing code...');
+            updateSystemLog('Optimization process started', 'info');
+
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/optimize-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: currentCode,
+                        language: language
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentCode = data.optimized_code || currentCode;
+                    document.getElementById('codeEditor').value = currentCode;
+                    updateOutput('Code optimized successfully!');
+                    updateSystemLog('Optimization completed successfully', 'info');
+                    await simulateAgentWorkflow('optimization');
+                } else {
+                    throw new Error('Failed to optimize code');
+                }
+
+            } catch (error) {
+                updateOutput(`Error optimizing code: ${error.message}`);
+                updateSystemLog(`Optimization error: ${error.message}`, 'error');
+            }
+        }
+
+        // Explain Code
+        async function explainCode() {
+            if (!currentCode) {
+                updateOutput('No code to explain. Please generate code first.');
+                return;
+            }
+
+            const language = document.getElementById('language').value;
+            updateOutput('Generating explanation...');
+            updateSystemLog('Explanation process started', 'info');
+
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/explain-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: currentCode,
+                        language: language
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    updateOutput('Code Explanation:');
+                    updateOutput(data.explanation || 'No explanation available.');
+                    updateSystemLog('Explanation generated successfully', 'info');
+                    await simulateAgentWorkflow('explanation');
+                } else {
+                    throw new Error('Failed to explain code');
+                }
+
+            } catch (error) {
+                updateOutput(`Error explaining code: ${error.message}`);
+                updateSystemLog(`Explanation error: ${error.message}`, 'error');
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('generateBtn').addEventListener('click', generateCode);
+        document.getElementById('runBtn').addEventListener('click', runCode);
+        document.getElementById('debugBtn').addEventListener('click', debugCode);
+        document.getElementById('optimizeBtn').addEventListener('click', optimizeCode);
+        document.getElementById('explainBtn').addEventListener('click', explainCode);
+
+        // Console actions
+        document.querySelector('.console-actions .icon-btn:first-child').addEventListener('click', () => {
+            document.getElementById('outputConsole').value = '';
+            updateOutput('Console cleared.');
+        });
+
+        document.querySelector('.console-actions .icon-btn:last-child').addEventListener('click', () => {
+            const console = document.getElementById('outputConsole');
+            navigator.clipboard.writeText(console.value);
+            updateOutput('Console output copied to clipboard.');
+        });
+
+        // Editor actions
+        document.querySelector('.editor-actions .icon-btn:first-child').addEventListener('click', () => {
+            navigator.clipboard.writeText(currentCode);
+            updateOutput('Code copied to clipboard.');
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'Enter':
+                        e.preventDefault();
+                        generateCode();
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        runCode();
+                        break;
+                    case 'd':
+                        e.preventDefault();
+                        debugCode();
+                        break;
+                    case 'o':
+                        e.preventDefault();
+                        optimizeCode();
+                        break;
+                    case 'e':
+                        e.preventDefault();
+                        explainCode();
+                        break;
+                }
+            }
+        });
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeTimeline();
+            updateSystemLog('Autonomous Coding Agent initialized', 'info');
+            updateSystemLog('All agents ready and waiting for tasks', 'info');
+            updateOutput('Welcome to Autonomous Coding Agent! Enter a prompt and click "Generate Code" to begin.');
+            updateOutput('Keyboard shortcuts: Ctrl+Enter (Generate), Ctrl+R (Run), Ctrl+D (Debug), Ctrl+O (Optimize), Ctrl+E (Explain)');
+        });
+    </script>
+</body>
+</html>

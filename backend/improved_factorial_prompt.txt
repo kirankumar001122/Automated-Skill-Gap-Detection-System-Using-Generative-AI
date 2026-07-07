@@ -1,0 +1,9 @@
+Create a complete and robust factorial function in Python that:
+1. Handles edge cases properly (negative numbers, zero, positive integers)
+2. Includes proper error handling with descriptive messages
+3. Has comprehensive test cases
+4. Includes input validation
+5. Uses clear variable names and comments
+6. Follows Python best practices
+
+Make sure the function works correctly for all test cases and provides meaningful error messages.

@@ -1,0 +1,231 @@
+/* Autonomous Coding Agent - Additional CSS Styles */
+
+/* Enhanced animations and transitions */
+@keyframes slideInFromLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Panel entrance animations */
+.glass-panel {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.left-panel {
+    animation: slideInFromLeft 0.8s ease-out;
+}
+
+.right-panel {
+    animation: slideInFromRight 0.8s ease-out;
+}
+
+.center-panel {
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+/* Enhanced button effects */
+.btn {
+    position: relative;
+    overflow: hidden;
+    transform: translateZ(0);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn:hover {
+    transform: translateY(-2px) scale(1.02);
+}
+
+.btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* Ripple effect for buttons */
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:active::after {
+    width: 300px;
+    height: 300px;
+}
+
+/* Enhanced code editor styling */
+#codeEditor {
+    background: linear-gradient(135deg, #1e1e1e, #2d2d2d);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+    font-family: 'Cascadia Code', 'Fira Code', 'Monaco', 'Menlo', monospace;
+    line-height: 1.7;
+    tab-size: 4;
+}
+
+/* Syntax highlighting colors */
+#codeEditor {
+    color: #d4d4d4;
+}
+
+/* Console enhancements */
+#outputConsole {
+    background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+    border: 1px solid rgba(0, 255, 0, 0.1);
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+    font-family: 'Cascadia Code', 'Fira Code', 'Monaco', 'Menlo', monospace;
+    text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+}
+
+/* Agent status enhancements */
+.agent-item {
+    backdrop-filter: blur(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.agent-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(5px) scale(1.02);
+    box-shadow: 0 5px 20px rgba(79, 172, 254, 0.2);
+}
+
+/* Loading states */
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #4facfe;
+    animation: spin 1s ease-in-out infinite;
+}
+
+/* Success animations */
+@keyframes successPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(79, 172, 254, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(79, 172, 254, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(79, 172, 254, 0);
+    }
+}
+
+.success-animation {
+    animation: successPulse 1s ease-out;
+}
+
+/* Enhanced glass morphism */
+.glass-panel {
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Dark theme adjustments */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --glass-bg: rgba(0, 0, 0, 0.2);
+        --glass-border: rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Performance optimizations */
+.glass-panel,
+.btn,
+.agent-item {
+    will-change: transform;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High DPI displays optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .glass-panel {
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .main-container {
+        padding: 10px 20px;
+        gap: 15px;
+    }
+    
+    .glass-panel {
+        border-radius: 12px;
+    }
+    
+    .header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .btn {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+}
+
+/* Print styles */
+@media print {
+    .bg-animation,
+    .console-container {
+        display: none !important;
+    }
+    
+    .main-container {
+        height: auto;
+        grid-template-columns: 1fr;
+    }
+    
+    .glass-panel {
+        background: white;
+        color: black;
+        border: 1px solid #ccc;
+    }
+}

@@ -1,0 +1,151 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Fira+Code:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 248, 250, 252;
+  --background-start-rgb: 2, 6, 23;
+  --background-end-rgb: 15, 23, 42;
+
+  --primary: #3b82f6;
+  --primary-glow: rgba(59, 130, 246, 0.4);
+  --secondary: #8b5cf6;
+  --secondary-glow: rgba(139, 92, 246, 0.4);
+  --accent: #0ea5e9;
+  --accent-glow: rgba(14, 165, 233, 0.4);
+
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+
+  --card-bg: rgba(15, 23, 42, 0.5);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --sidebar-bg: rgba(2, 6, 23, 0.8);
+}
+
+@layer base {
+  body {
+    @apply antialiased selection:bg-blue-500/30 selection:text-white;
+    color: rgb(var(--foreground-rgb));
+    background: #020617;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl;
+  }
+
+  .glass-card {
+    @apply bg-slate-800/30 backdrop-blur-md border border-white/5 hover:border-blue-500/20 transition-all duration-300;
+  }
+
+  .nexora-glow {
+    @apply shadow-[0_0_30px_rgba(59, 130, 246, 0.2)] border-blue-500/30 backdrop-blur-2xl;
+  }
+
+  .neon-border-blue {
+    @apply border-blue-500/40 shadow-[0_0_15px_rgba(59, 130, 246, 0.15)];
+  }
+
+  .neon-border-purple {
+    @apply border-purple-500/30 shadow-[0_0_15px_rgba(139, 92, 246, 0.1)];
+  }
+
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300 shadow-lg shadow-blue-600/20 active:scale-95 flex items-center gap-2;
+  }
+
+  .btn-secondary {
+    @apply bg-slate-800 hover:bg-slate-700 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300 border border-white/5 active:scale-95 flex items-center gap-2;
+  }
+
+  .editor-container {
+    @apply rounded-2xl overflow-hidden border border-white/5 shadow-2xl bg-[#0d1117];
+  }
+
+  .terminal-text {
+    @apply font-mono text-sm leading-relaxed;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-700/50 rounded-full hover:bg-slate-600/50 transition-colors;
+}
+
+/* Animations */
+@keyframes pulse-soft {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 3s infinite ease-in-out;
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s ease-out forwards;
+}
+
+/* Code Readability Enhancements */
+.token.comment {
+  @apply text-slate-500 italic;
+}
+
+.token.string {
+  @apply text-emerald-400;
+}
+
+.token.function {
+  @apply text-blue-400;
+}
+
+.token.keyword {
+  @apply text-purple-400 font-medium;
+}
+
+.token.operator {
+  @apply text-pink-400;
+}
+
+/* Grid Background Effect */
+.bg-grid {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+.bg-radial-gradient {
+  background: radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.15), transparent 70%);
+}
