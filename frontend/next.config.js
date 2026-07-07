@@ -2,18 +2,21 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+
   async rewrites() {
     return [
       {
         source: '/api/v1/:path*',
-        destination: 'http://127.0.0.1:8000/api/v1/:path*',
+        destination:
+          'https://automated-skill-gap-detection-system.onrender.com/api/v1/:path*',
       },
       {
         source: '/health',
-        destination: 'http://127.0.0.1:8000/health',
+        destination:
+          'https://automated-skill-gap-detection-system.onrender.com/health',
       },
-    ]
+    ];
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
